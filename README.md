@@ -80,7 +80,7 @@ Type: `String`
 
 directory to begin resolving from
 
-The effective `basedir` is calculated in following order, stopped when a non-empty value generated:
+The effective `basedir` is calculated in the following order, stopped when a non-empty value generated:
 
 1. `options.basedir`
 2. `path.dirname(options.filename)`
