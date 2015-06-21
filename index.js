@@ -26,41 +26,50 @@ function custom(pkgEntry, options) {
             opts = {};
         }
         opts = opts || {};
+        var basedir = getBasedir(opts) || path.dirname(caller());
         return resolver(
             id,
-            makeOpts(opts, opts.basedir || opts.filename || caller()),
+            makeOpts(opts, basedir),
             next
         );
     }
 
     function resolveSync(id, opts) {
         opts = opts || {};
+        var basedir = getBasedir(opts) || path.dirname(caller());
         return resolver.sync(
             id,
-            makeOpts(opts, opts.basedir || opts.filename || caller())
+            makeOpts(opts, basedir)
         );
     }
 
-    function makeOpts(opts, filename) {
+    function getBasedir(opts) {
+        return opts.basedir || opts.filename &&
+               path.dirname(opts.filename) ||
+               options.basedir;
+    }
+
+    function makeOpts(opts, basedir) {
         opts = mix(
             { packageFilter: packageFilter },
             options,
             opts,
             {
+                basedir: basedir,
                 moduleDirectory: concat(
-                    moduleDirectory, opts.moduleDirectory
+                    opts.moduleDirectory,
+                    moduleDirectory
                 ),
                 paths: concat(
-                    options.paths, opts.paths
+                    opts.paths,
+                    options.paths
                 ),
                 extensions: concat(
-                    extensions, opts.extensions
+                    opts.extensions,
+                    extensions
                 ),
             }
         );
-        if (!opts.basedir) {
-            opts.basedir = path.dirname(filename);
-        }
         return opts;
     }
 
