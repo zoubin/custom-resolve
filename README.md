@@ -87,7 +87,7 @@ The effective `basedir` is calculated in following order, stopped when a non-emp
 3. `defaultOptions.basedir`
 4. `path.dirname(caller())`
 
-`call()` is the filename where `resolve` is called.
+`caller()` is the filename where `resolve` is called.
 
 #### extensions
 
