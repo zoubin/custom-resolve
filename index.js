@@ -1,5 +1,5 @@
 var resolver = require('resolve');
-var merge = require('util-mix').merge;
+var mix = require('util-mix');
 var path = require('path');
 var caller = require('caller');
 
@@ -11,6 +11,13 @@ function custom(pkgEntry, options) {
         pkgEntry = 'main';
     }
     resolve.sync = resolveSync;
+    options = options || {};
+    var extensions = options.extensions
+        ? [].concat(options.extensions)
+        : ['.js'];
+    var moduleDirectory = options.moduleDirectory
+        ? [].concat(options.moduleDirectory)
+        : ['node_modules'];
     return resolve;
 
     function resolve(id, opts, next) {
@@ -18,27 +25,41 @@ function custom(pkgEntry, options) {
             next = opts;
             opts = {};
         }
+        opts = opts || {};
         return resolver(
             id,
-            makeOpts(merge({ filename: caller() }, options, opts)),
+            makeOpts(opts, opts.basedir || opts.filename || caller()),
             next
         );
     }
 
     function resolveSync(id, opts) {
+        opts = opts || {};
         return resolver.sync(
             id,
-            makeOpts(merge({ filename: caller() }, options, opts))
+            makeOpts(opts, opts.basedir || opts.filename || caller())
         );
     }
 
-    function makeOpts(opts) {
-        opts = merge(
+    function makeOpts(opts, filename) {
+        opts = mix(
             { packageFilter: packageFilter },
-            opts
+            options,
+            opts,
+            {
+                moduleDirectory: concat(
+                    moduleDirectory, opts.moduleDirectory
+                ),
+                paths: concat(
+                    options.paths, opts.paths
+                ),
+                extensions: concat(
+                    extensions, opts.extensions
+                ),
+            }
         );
         if (!opts.basedir) {
-            opts.basedir = path.dirname(opts.filename);
+            opts.basedir = path.dirname(filename);
         }
         return opts;
     }
@@ -47,4 +68,8 @@ function custom(pkgEntry, options) {
         pkg.main = pkg[pkgEntry] ? pkg[pkgEntry] : 'index';
         return pkg;
     }
+}
+
+function concat() {
+    return Array.prototype.concat.apply([], arguments).filter(Boolean);
 }
