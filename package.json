@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "caller": "^1.0.0",
+    "realpathify": "^0.1.2",
     "resolve": "^1.1.6",
     "util-mix": "^1.2.1"
   }
