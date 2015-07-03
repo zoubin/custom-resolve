@@ -1,6 +1,6 @@
 {
   "name": "custom-resolve",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Sugar way to customize substack's resolve",
   "main": "index.js",
   "directories": {
