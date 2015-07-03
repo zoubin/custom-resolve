@@ -69,7 +69,7 @@ Additional options:
 
 Type: `true`, `Array`
 
-If `true`, all symlinked subdirectories in `file`'s `node_modules` will be resolved to theire realpaths.
+If `true`, all symlinked subdirectories in `file`'s `node_modules` will be resolved to their realpaths.
 
 If `Array`, it should contains subdirectory names, and only those are realpathified.
 
