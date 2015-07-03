@@ -2,6 +2,7 @@ var resolver = require('resolve');
 var mix = require('util-mix');
 var path = require('path');
 var caller = require('caller');
+var realpathify = require('realpathify');
 
 module.exports = custom;
 
@@ -18,6 +19,11 @@ function custom(pkgEntry, options) {
     var moduleDirectory = options.moduleDirectory
         ? [].concat(options.moduleDirectory)
         : ['node_modules'];
+    if (options.symlinks) {
+        var ret = realpathify.async(resolve, options.symlinks === true ? [] : options.symlinks);
+        ret.sync = realpathify.sync(resolve.sync, options.symlinks === true ? [] : options.symlinks);
+        return ret;
+    }
     return resolve;
 
     function resolve(id, opts, next) {

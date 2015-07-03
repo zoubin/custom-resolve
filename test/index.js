@@ -1,5 +1,5 @@
 var resolver = require('..');
-var test = require('tape');
+var test = require('tap').test;
 var path = require('path');
 
 function fixtures() {
@@ -154,5 +154,23 @@ test('extensions', function(t) {
         'should concat, default'
     );
     t.end();
+})
+
+test('symlink', function(t) {
+    t.plan(2);
+
+    var resolve = resolver({ symlinks: true });
+    resolve('symlink_module', { basedir: fixtures() }, function (err, file) {
+        t.equal(
+            file,
+            fixtures('symlink_module', 'index.js'),
+            'async'
+        )
+    })
+    t.equal(
+        resolve.sync('symlink_module', { basedir: fixtures() }),
+        fixtures('symlink_module', 'index.js'),
+        'sync'
+    )
 })
 

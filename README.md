@@ -63,6 +63,16 @@ Default: `main`
 Exactly the same `options` used by [node-resolve](https://github.com/substack/node-resolve)
 Those values specified in `defaultOptions` will be used as the default value for the options used by `resolve`
 
+Additional options:
+
+#### symlinks
+
+Type: `true`, `Array`
+
+If `true`, all symlinked subdirectories in `file`'s `node_modules` will be resolved to theire realpaths.
+
+If `Array`, it should contains subdirectory names, and only those are realpathified.
+
 ## resolve(id, options, cb)
 
 Type: `Function`
