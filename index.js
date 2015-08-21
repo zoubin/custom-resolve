@@ -71,7 +71,7 @@ function realpath(file, options) {
   if (symlinks && typeof symlinks.test === 'function') {
     return symlinks.test(file) ? fs.realpathSync(file) : file;
   }
-  if ([].concat(symlinks).filter(Boolean).indexOf(file) !== -1) {
+  if (symlinks && [].concat(symlinks).indexOf(file) !== -1) {
     return fs.realpathSync(file);
   }
   return file;
