@@ -67,11 +67,15 @@ Additional options:
 
 #### symlinks
 
-Type: `true`, `Array`
+Type: `true`, `Array`, `String`, `RegExp`
 
-If `true`, all symlinked subdirectories in `file`'s `node_modules` will be resolved to their realpaths.
+If `true`, symlinks will be resolved to their realpaths.
 
-If `Array`, it should contains subdirectory names, and only those are realpathified.
+If `Array`, it should contain absolute paths of symlinks which are intended to be realpathified.
+
+If `String`, it is the same with `[the-string]`.
+
+If `RegExp` or any object with a `test` method, the `test` method will be called with the resolved file, and if `test` returns `true`, the resolved file will be realpathified.
 
 ## resolve(id, options, cb)
 

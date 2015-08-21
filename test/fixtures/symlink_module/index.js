@@ -1,1 +1,1 @@
-module.exports = 'symlink'
+module.exports = 'symlink';
