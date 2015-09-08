@@ -71,8 +71,16 @@ function realpath(file, options) {
   if (symlinks && typeof symlinks.test === 'function') {
     return symlinks.test(file) ? fs.realpathSync(file) : file;
   }
-  if (symlinks && [].concat(symlinks).indexOf(file) !== -1) {
+  if (symlinks && [].concat(symlinks).indexOf(extractNodeModuleDir(file)) !== -1) {
     return fs.realpathSync(file);
+  }
+  return file;
+}
+
+function extractNodeModuleDir(file) {
+  var m = file.split('/node_modules/')[1];
+  if (m) {
+    return m.split('/')[0] || file;
   }
   return file;
 }

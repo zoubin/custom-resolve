@@ -71,7 +71,17 @@ Type: `true`, `Array`, `String`, `RegExp`
 
 If `true`, symlinks will be resolved to their realpaths.
 
-If `Array`, it should contain absolute paths of symlinks which are intended to be realpathified.
+If `Array`, it should contain module directories intended to be realpathified.
+
+```javascript
+var resolver = require('..');
+
+var resolve = resolver('style', {
+  // Files under `/path/to/node_modules/@app` will be realpathified
+  symlinks: ['@app']
+});
+
+```
 
 If `String`, it is the same with `[the-string]`.
 

@@ -147,7 +147,7 @@ test('extensions', function(t) {
 test('symlink', function(t) {
   t.plan(2);
 
-  var resolve = resolver({ symlinks: true });
+  var resolve = resolver({ symlinks: 'symlink_module' });
   resolve('symlink_module', { basedir: fixtures() }, function (err, file) {
     t.equal(
       file,
