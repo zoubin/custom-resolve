@@ -75,15 +75,15 @@ Expected: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/color
 Actual: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/colors/colors.scss
 ```
 
-## resolve = resolver(pkgEntry, defaultOptions)
+## resolve = resolver(packageEntry, defaultOptions)
 
-### pkgEntry
+### packageEntry
 
 Type: `String`
 
 Default: `main`
 
-If `pkgEntry` is `Object`,
+If `packageEntry` is `Object`,
 then it is treated as `defaultOptions`,
 and the package entry is assumed to be specified by `defaultOptions.packageEntry`.
 

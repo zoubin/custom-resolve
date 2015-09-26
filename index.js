@@ -4,14 +4,14 @@ var path = require('path');
 var caller = require('caller');
 var fs = require('fs');
 
-module.exports = function (pkgEntry, options) {
-  if (typeof pkgEntry === 'object') {
-    options = pkgEntry || {};
-    pkgEntry = options.packageEntry || 'main';
+module.exports = function (packageEntry, options) {
+  if (typeof packageEntry === 'object') {
+    options = packageEntry || {};
+    packageEntry = options.packageEntry || 'main';
   }
 
   options = options || {};
-  options.pkgEntry = pkgEntry;
+  options.packageEntry = packageEntry;
 
   function resolve(id, opts, next) {
     if (typeof opts === 'function') {
@@ -97,7 +97,7 @@ function makeOpts(options, opts, basedir) {
         if (typeof packageFilter === 'function') {
           pkg = packageFilter(pkg, pkgfile);
         }
-        pkg.main = pkg[options.pkgEntry] || 'index';
+        pkg.main = pkg[options.packageEntry] || 'index';
         return pkg;
       },
       moduleDirectory: concat(
