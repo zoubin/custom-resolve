@@ -6,8 +6,8 @@ var fs = require('fs');
 
 module.exports = function (pkgEntry, options) {
   if (typeof pkgEntry === 'object') {
-    options = pkgEntry;
-    pkgEntry = 'main';
+    options = pkgEntry || {};
+    pkgEntry = options.packageEntry || 'main';
   }
 
   options = options || {};
@@ -102,8 +102,7 @@ function makeOpts(options, opts, basedir) {
       },
       moduleDirectory: concat(
         opts.moduleDirectory,
-        [].concat(options.moduleDirectory, 'node_modules')
-          .filter(Boolean)
+        options.moduleDirectory || 'node_modules'
       ),
       paths: concat(
         opts.paths,
@@ -111,8 +110,7 @@ function makeOpts(options, opts, basedir) {
       ),
       extensions: concat(
         opts.extensions,
-        [].concat(options.extensions, '.js')
-          .filter(Boolean)
+        options.extensions || '.js'
       ),
     }
   );

@@ -1,53 +1,78 @@
 # custom-resolve
 Sugar way to customize substack's resolve, by setting default values for the options.
 
-## Usage
+## Example
 
-example/style-resolve.js:
+```
+⌘ tree example/
+example/
+├── node_modules
+│   └── colors
+│       ├── colors.scss
+│       └── package.json
+├── resolve.js
+└── style_modules
+    └── red
+        └── index.scss
+```
+
+example/node_modules/colors/package.json:
+```json
+{
+  "style": "colors"
+}
+```
+
+example/resolve.js:
 
 ```javascript
 var resolver = require('..');
+var path = require('path');
 
-var resolve = resolver('style', {
-    extensions: ['.css', '.scss'],
-    moduleDirectory: ['web_modules', 'node_modules'],
+var resolve = resolver({
+  packageEntry: 'style',
+  extensions: ['.scss'],
+});
+
+var colorsPath = path.join(
+  __dirname, 'node_modules', 'colors', 'colors.scss'
+);
+var redPath = path.join(
+  __dirname, 'style_modules', 'red', 'index.scss'
+);
+
+resolve('colors', function (err, file) {
+  console.log(
+    '\nExpected:',
+    colorsPath,
+    '\nActual:',
+    file
+  );
 });
 
 console.log(
-    resolve.sync(
-        'colors',
-        { filename: __filename }
-    )
-)
+  'Expected:',
+  redPath,
+  '\nActual:',
+  resolve.sync(
+    './red',
+    {
+      basedir: path.join(__dirname, 'style_modules'),
+    }
+  )
+);
 
-// Or, you can set the default `basedir`
-var resolve = resolver('style', {
-    extensions: ['.css', '.scss'],
-    basedir: __dirname + '/web_modules',
-});
-
-console.log(
-    resolve.sync('./colors')
-)
 ```
 
 output:
 
 ```
-⌘ tree example/
-example/
-├── style-resolve.js
-└── web_modules
-    └── colors
-        ├── colors.scss
-        └── package.json
+⌘ node example/resolve.js
+Expected: /Users/zoubin/usr/src/zoubin/custom-resolve/example/style_modules/red/index.scss
+Actual: /Users/zoubin/usr/src/zoubin/custom-resolve/example/style_modules/red/index.scss
 
-```
-
-```
-⌘ node example/style-resolve.js
-/Users/zoubin/usr/src/zoubin/custom-resolve/example/web_modules/colors/colors.scss
-/Users/zoubin/usr/src/zoubin/custom-resolve/example/web_modules/colors/colors.scss
+Expected: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/colors/colors.scss
+Actual: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/colors/colors.scss
 ```
 
 ## resolve = resolver(pkgEntry, defaultOptions)
@@ -57,6 +82,10 @@ example/
 Type: `String`
 
 Default: `main`
+
+If `pkgEntry` is `Object`,
+then it is treated as `defaultOptions`,
+and the package entry is assumed to be specified by `defaultOptions.packageEntry`.
 
 ### defaultOptions
 
@@ -119,7 +148,7 @@ Type: `String`, `Array`
 
 Default: `['.js']`
 
-array of file extensions to search in order
+File extensions to search in order
 
 The effective order:
 
