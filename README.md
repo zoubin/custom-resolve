@@ -89,6 +89,12 @@ Type: `String`
 
 Default: `main`
 
+### filename
+Specify the file path where to start resolving.
+
+It is meant to make setting the `basedir` option conveniently.
+
+Type: `String`
 
 ### symlink
 Specify how to treat symlinks in the top `node_modules` directory.
