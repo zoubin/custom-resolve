@@ -4,31 +4,45 @@ var path = require('path')
 var fixtures = path.resolve.bind(path, __dirname, 'fixtures')
 
 test('moduleDirectory, default', function(t) {
-  var resolve = resolver('style', { extensions: '.scss' })
+  t.plan(2)
 
-  t.equal(
-    resolve.sync('style', {
-      basedir: fixtures('local_modules', 'default'),
-    }),
-    fixtures('node_modules', 'style', 'style.scss')
-  )
+  var resolve = resolver({
+    extensions: '.scss',
+    main: 'style',
+  })
 
-  t.end()
+  var expected = fixtures('node_modules', 'style', 'style.scss')
+  var opts = {
+    basedir: fixtures('local_modules', 'default'),
+  }
+
+  resolve('style', opts, function (err, res) {
+    t.equal(res, expected, 'async')
+  })
+
+  t.equal(resolve.sync('style', opts), expected, 'sync')
+
 })
 
 test('moduleDirectory, custom', function(t) {
-  var resolve = resolver('style', {
+  t.plan(2)
+
+  var resolve = resolver({
     extensions: '.scss',
     moduleDirectory: 'web_modules',
+    main: 'style',
   })
 
-  t.equal(
-    resolve.sync('default', {
-      basedir: fixtures('local_modules', 'default'),
-    }),
-    fixtures('web_modules', 'default', 'index.scss')
-  )
+  var expected = fixtures('web_modules', 'default', 'index.scss')
+  var opts = {
+    basedir: fixtures('local_modules', 'default'),
+  }
 
-  t.end()
+  resolve('default', opts, function (err, res) {
+    t.equal(res, expected, 'async')
+  })
+
+  t.equal(resolve.sync('default', opts), expected, 'sync')
+
 })
 
