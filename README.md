@@ -1,5 +1,11 @@
 # custom-resolve
-Sugar way to customize substack's resolve, by setting default values for the options.
+[![version](https://img.shields.io/npm/v/custom-resolve.svg)](https://www.npmjs.org/package/custom-resolve)
+[![status](https://travis-ci.org/zoubin/custom-resolve.svg?branch=master)](https://travis-ci.org/zoubin/custom-resolve)
+[![coverage](https://img.shields.io/coveralls/zoubin/custom-resolve.svg)](https://coveralls.io/github/zoubin/custom-resolve)
+[![dependencies](https://david-dm.org/zoubin/custom-resolve.svg)](https://david-dm.org/zoubin/custom-resolve)
+[![devDependencies](https://david-dm.org/zoubin/custom-resolve/dev-status.svg)](https://david-dm.org/zoubin/custom-resolve#info=devDependencies)
+
+Return a function works like substack's [`node-resolve`], with some options set by default.
 
 ## Example
 
@@ -26,41 +32,23 @@ example/node_modules/colors/package.json:
 example/resolve.js:
 
 ```javascript
-var resolver = require('..');
-var path = require('path');
+var resolver = require('..')
+var path = require('path')
 
 var resolve = resolver({
-  packageEntry: 'style',
+  main: 'style',
   extensions: ['.scss'],
-});
-
-var colorsPath = path.join(
-  __dirname, 'node_modules', 'colors', 'colors.scss'
-);
-var redPath = path.join(
-  __dirname, 'style_modules', 'red', 'index.scss'
-);
+})
 
 resolve('colors', function (err, file) {
-  console.log(
-    '\nExpected:',
-    colorsPath,
-    '\nActual:',
-    file
-  );
-});
+  console.log(path.relative(__dirname, file))
+})
 
 console.log(
-  'Expected:',
-  redPath,
-  '\nActual:',
-  resolve.sync(
-    './red',
-    {
-      basedir: path.join(__dirname, 'style_modules'),
-    }
-  )
-);
+  path.relative(__dirname, resolve.sync('./red', {
+    basedir: path.join(__dirname, 'style_modules'),
+  }))
+)
 
 ```
 
@@ -68,116 +56,55 @@ output:
 
 ```
 ⌘ node example/resolve.js
-Expected: /Users/zoubin/usr/src/zoubin/custom-resolve/example/style_modules/red/index.scss
-Actual: /Users/zoubin/usr/src/zoubin/custom-resolve/example/style_modules/red/index.scss
+style_modules/red/index.scss
+node_modules/colors/colors.scss
 
-Expected: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/colors/colors.scss
-Actual: /Users/zoubin/usr/src/zoubin/custom-resolve/example/node_modules/colors/colors.scss
 ```
 
-## resolve = resolver(packageEntry, defaultOptions)
+## Breaking changes in v1.0.0
 
-### packageEntry
+* The options specified will be treated as the default options for [`node-resolve`], and when the returned custom resolve function called, options passed to it will **overwrite** the corresponding default options.
+* The `packageEntry` option is replaced by `main`.
+* The `symlinks` option is replaced by `symlink`. Check [`symlink`](#symlink) for more details.
+* The API only receives one argument.
+
+## resolve = resolver(defaultOptions)
+
+Return a function like [`node-resolve`],
+with some of the options set by default according to `defaultOptions`.
+
+When `resolve` is called with extra options,
+they **overwrite** those in `defaultOptions`.
+
+Besides all options supported by [`node-resolve`],
+`defaultOptions` supports the following options.
+
+Refer to [`node-resolve`] for more information about supported options.
+
+### main
+Specify the package entry.
+If `defaultOptions` is `String`, it is treated as the `main` option.
 
 Type: `String`
 
 Default: `main`
 
-If `packageEntry` is `Object`,
-then it is treated as `defaultOptions`,
-and the package entry is assumed to be specified by `defaultOptions.packageEntry`.
 
-### defaultOptions
+### symlink
+Specify how to treat symlinks in the top `node_modules` directory.
 
-Exactly the same `options` used by [node-resolve](https://github.com/substack/node-resolve)
-Those values specified in `defaultOptions` will be used as the default value for the options used by `resolve`
+Type: `true`
 
-Additional options:
+All symlinks will be resolved to their realpaths.
 
-#### symlinks
+Type: `Array`, `String`
 
-Type: `true`, `Array`, `String`, `RegExp`
-
-If `true`, symlinks will be resolved to their realpaths.
-
-If `Array`, it should contain module directories intended to be realpathified.
-
-```javascript
-var resolver = require('..');
-
-var resolve = resolver('style', {
-  // Files under `/path/to/node_modules/@app` will be realpathified
-  symlinks: ['@app']
-});
-
-```
-
-If `String`, it is the same with `[the-string]`.
-
-If `RegExp` or any object with a `test` method, the `test` method will be called with the resolved file, and if `test` returns `true`, the resolved file will be realpathified.
-
-## resolve(id, options, cb)
+Only those specified will be resolved to realpaths.
 
 Type: `Function`
 
-`resolve` has the same signature of [node-resolve](https://github.com/substack/node-resolve)
+Signature: `needRealpath = symlink(file)`
 
-Some options specified by `defaultOptions` are just overwritten by those from `options`.
-However, the others respect some defaulting rules
+Realpaths are used only when this function returns a truthy value.
 
-### option defaulting rules
-
-#### basedir
-
-Type: `String`
-
-directory to begin resolving from
-
-The effective `basedir` is calculated in the following order, stopped when a non-empty value generated:
-
-1. `options.basedir`
-2. `path.dirname(options.filename)`
-3. `defaultOptions.basedir`
-4. `path.dirname(caller())`
-
-`caller()` is the filename where `resolve` is called.
-
-#### extensions
-
-Type: `String`, `Array`
-
-Default: `['.js']`
-
-File extensions to search in order
-
-The effective order:
-
-1. `options.extensions`
-2. `defaultOptions.extensions`
-
-#### moduleDirectory
-
-Type: `String`, `Array`
-
-Default: `['node_modules']`
-
-directory (or directories) in which to recursively look for modules.
-
-The effective order:
-
-1. `options.moduleDirectory`
-2. `defaultOptions.moduleDirectory`
-
-#### paths
-
-Type: `String`, `Array`
-
-Default: `[]`
-
-require.paths array to use if nothing is found on the normal
-
-The effective order:
-
-1. `options.paths`
-2. `defaultOptions.paths`
-
+[`node-resolve`]: https://github.com/substack/node-resolve

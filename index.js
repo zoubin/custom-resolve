@@ -1,118 +1,87 @@
-var resolver = require('resolve');
-var mix = require('util-mix');
-var path = require('path');
-var caller = require('caller');
-var fs = require('fs');
+var resolver = require('resolve')
+var path = require('path')
+var caller = require('caller')
+var fs = require('fs')
 
-module.exports = function (packageEntry, options) {
-  if (typeof packageEntry === 'object') {
-    options = packageEntry || {};
-    packageEntry = options.packageEntry || 'main';
+module.exports = function (options) {
+  if (typeof options === 'string') {
+    options = { main: options }
   }
 
-  options = options || {};
-  options.packageEntry = packageEntry;
+  options = options || {}
+  options.packageFilter = function (pkg) {
+    pkg.main = pkg[options.main || 'main'] || 'index'
+    return pkg
+  }
+
+  function buildOptions(opts) {
+    opts = opts || {}
+
+    /* eslint-disable no-proto */
+    opts.__proto__ = options
+
+    if (!opts.basedir && opts.filename) {
+      opts.basedir = path.dirname(opts.filename)
+    }
+
+    return opts
+  }
 
   function resolve(id, opts, next) {
     if (typeof opts === 'function') {
-      next = opts;
-      opts = {};
+      next = opts
+      opts = {}
     }
-    opts = opts || {};
-    var basedir = getBasedir(opts, options.basedir) || path.dirname(caller());
-    return resolver(
-      id,
-      makeOpts(options, opts, basedir),
-      function (err, file) {
-        if (!err && file) {
-          file = realpath(file, options);
-        }
-        next(err, file);
+
+    opts = buildOptions(opts)
+    if (!opts.basedir) {
+      opts.basedir = path.dirname(caller())
+    }
+
+    return resolver(id, opts, function (err, res) {
+      if (!err) {
+        res = realpath(res, options.symlink)
       }
-    );
+      next.apply(null, [err, res].concat(slice(arguments, 2)))
+    })
   }
 
   function resolveSync(id, opts) {
-    opts = opts || {};
-    var basedir = getBasedir(opts, options.basedir) || path.dirname(caller());
-    return realpath(
-      resolver.sync(
-        id,
-        makeOpts(options, opts, basedir)
-      ),
-      options
-    );
+    opts = buildOptions(opts)
+    if (!opts.basedir) {
+      opts.basedir = path.dirname(caller())
+    }
+    if (opts.extensions && !Array.isArray(opts.extensions)) {
+      opts.extensions = [opts.extensions]
+    }
+
+    return realpath(resolver.sync(id, opts), options.symlink)
   }
 
-  resolve.sync = resolveSync;
-  return resolve;
-};
-
-function concat() {
-  return Array.prototype.concat.apply([], arguments)
-    .filter(Boolean);
+  resolve.sync = resolveSync
+  return resolve
 }
 
-function getBasedir(opts, fallback) {
-  return opts.basedir ||
-    opts.filename && path.dirname(opts.filename) ||
-    fallback;
-}
-
-function realpath(file, options) {
-  options = options || {};
-  var symlinks = options.symlinks;
-  if (symlinks === true) {
-    return fs.realpathSync(file);
+function realpath(file, symlink) {
+  if (symlink === true) {
+    return fs.realpathSync(file)
   }
-  if (typeof symlinks === 'function') {
-    return symlinks(file) ? fs.realpathSync(file) : file;
+  if (typeof symlink === 'function') {
+    return symlink(file) ? fs.realpathSync(file) : file
   }
-  if (symlinks && typeof symlinks.test === 'function') {
-    return symlinks.test(file) ? fs.realpathSync(file) : file;
+  if (symlink && [].concat(symlink).indexOf(extractNodeModuleDir(file)) !== -1) {
+    return fs.realpathSync(file)
   }
-  if (symlinks && [].concat(symlinks).indexOf(extractNodeModuleDir(file)) !== -1) {
-    return fs.realpathSync(file);
-  }
-  return file;
+  return file
 }
 
 function extractNodeModuleDir(file) {
-  var m = file.split('/node_modules/')[1];
-  if (m) {
-    return m.split('/')[0] || file;
-  }
-  return file;
+  var m = file.split('/node_modules/')[1]
+  if (!m) return file
+  return m.split('/')[0] || file
 }
 
-function makeOpts(options, opts, basedir) {
-  var packageFilter = opts.packageFilter;
-  return mix(
-    {},
-    options,
-    opts,
-    {
-      basedir: basedir,
-      packageFilter: function (pkg, pkgfile) {
-        if (typeof packageFilter === 'function') {
-          pkg = packageFilter(pkg, pkgfile);
-        }
-        pkg.main = pkg[options.packageEntry] || 'index';
-        return pkg;
-      },
-      moduleDirectory: concat(
-        opts.moduleDirectory,
-        options.moduleDirectory || 'node_modules'
-      ),
-      paths: concat(
-        opts.paths,
-        options.paths
-      ),
-      extensions: concat(
-        opts.extensions,
-        options.extensions || '.js'
-      ),
-    }
-  );
+function slice(o, from, to) {
+  return Array.prototype.slice.call(o, from, to)
 }
 
