@@ -2,6 +2,7 @@ var resolver = require('resolve')
 var path = require('path')
 var caller = require('caller')
 var fs = require('fs')
+var mix = require('mixy')
 
 module.exports = function (options) {
   if (typeof options === 'string') {
@@ -15,10 +16,7 @@ module.exports = function (options) {
   }
 
   function buildOptions(opts) {
-    opts = opts || {}
-
-    /* eslint-disable no-proto */
-    opts.__proto__ = options
+    opts = mix({}, options, opts)
 
     if (!opts.basedir && opts.filename) {
       opts.basedir = path.dirname(opts.filename)
